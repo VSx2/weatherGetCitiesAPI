@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<head>
+	<title>Doc page</title>
+	<style>
+		.codeview {
+			background-color: #999999;
+		}
+	</style>
+</head>
+<body>
+	<h1>Doc Page</h1>
+	<p>Api is available on <a href="api">Page</a>.</p>
+	<p>To download source file visit <a href="http://bulk.openweathermap.org/sample/">Page</a>, download and unpack city.list.json.gz.<p>
+	<h2>Available Params</h2>
+	<ul>
+		<li><b>mode</b> - "0" for "start with" search, "1" for "contains"</li>
+		<li><b>q</b> - query</li>
+		<li><b>keys</b> - comma-separated keys - available: ("name", "id", "country", "coord"). Default - name,id</li>
+		<li><b>limit</b> - return n values</li>
+		<li><b>offset</b> - offset</li>
+	</ul>
+	<h2>Example</h2>
+	<p>Simple request:</p>
+	<div class="codeview">
+		<tt>
+			curl -X GET 'http://{host}:{port}/api' \
+			-d mode=0 \
+			-d q=kiev
+		</tt>
+	</div>
+	<p>
+		Response:
+	</p>
+	<div class="codeview">
+		<tt>
+			{"errors": [], "result": [{"name": "Kievskij", "id": 6697077}, {"name": "Kieve", "id": 2890943}, {"name": "Kieve", "id": 6548066}, {"name": "Kiev", "id": 703448}, {"name": "Kievka", "id": 1522605}]}
+		</tt>
+	</div>
+</body>
