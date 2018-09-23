@@ -65,6 +65,7 @@ class ApiHandler(tornado.web.RequestHandler):
             self.set_status(500)
             return self.finish(result_dict)
         result = []
+        total_items = len(db_keys)
         if limit:
             try:
                 limit = int(limit)
@@ -79,7 +80,6 @@ class ApiHandler(tornado.web.RequestHandler):
                 result_dict['errors'].append("Invalid offset")
                 return self.finish(result_dict)
             db_keys = db_keys[offset * limit:(offset + 1) * limit]
-        total_items = len(db_keys)
         for i in db_keys:
             val = yield from redis.smembers(i)
             for j in val:
