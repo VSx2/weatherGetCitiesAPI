@@ -10,7 +10,7 @@ import json
 import argparse
 import configparser
 
-ALLOWED_KEYS = set(["name", "id", "country", "coord"])
+ALLOWED_FIELDS = set(["name", "id", "country", "coord"])
 
 
 class ApiHandler(tornado.web.RequestHandler):
@@ -31,14 +31,14 @@ class ApiHandler(tornado.web.RequestHandler):
         mode = self.get_argument('mode', None)
         try:
             q = self.get_argument('q', None).lower()
-            keys = self.get_argument('keys', 'name,id').split(',')
+            fields = self.get_argument('fields', 'name,id').split(',')
         except SyntaxError:
             self.set_status(400)
-            result_dict['errors'].append("Invalid Query or Keys")
+            result_dict['errors'].append("Invalid Query or Fields")
             return self.finish(result_dict)
-        for i in keys:
-            if i not in ALLOWED_KEYS:
-                result_dict['errors'].append("Invalid key: {}".format(i))
+        for i in fields:
+            if i not in ALLOWED_FIELDS:
+                result_dict['errors'].append("Invalid field: {}".format(i))
         if result_dict['errors']:
             self.set_status(400)
             return self.finish(result_dict)
@@ -86,8 +86,8 @@ class ApiHandler(tornado.web.RequestHandler):
             for j in val:
                 tmp_val = json.loads(j)
                 tmp_result = {}
-                for key in keys:
-                    tmp_result[key] = tmp_val[key]
+                for field in fields:
+                    tmp_result[field] = tmp_val[field]
                 result.append(tmp_result)
         result_dict['items'] = result
         result_dict['total_items'] = total_items
