@@ -1,9 +1,9 @@
 # weatherGetCitiesAPI
-### Important This API is for <a href="https://openweathermap.org" target="_blank">OpenWeatherMap</a> cities. :sunny:
+### Important! This API is for <a href="https://openweathermap.org" target="_blank">OpenWeatherMap</a> cities. :sunny:
 
 ### Usage
 
-URL: http://apis.mcwladkoe.ml/api?mode=**{mode_code}**&q=**{query_string}** // You can pass some [create an anchor](#Additional params)
+URL: http://apis.mcwladkoe.ml/api?mode=**{mode_code}**&q=**{query_string}** // You can pass some [create an anchor](####Additional params)
 
 #### Main params
 
