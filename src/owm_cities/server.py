@@ -10,6 +10,8 @@ import json
 import argparse
 import configparser
 
+ALLOWED_KEYS = set(["name", "id", "country", "coord"])
+
 
 class ApiHandler(tornado.web.RequestHandler):
 
@@ -22,7 +24,8 @@ class ApiHandler(tornado.web.RequestHandler):
     def get(self):
         result_dict = {
             'errors': [],
-            'result': [],
+            'items': [],
+            'status': 'error',
         }
 
         mode = self.get_argument('mode', None)
@@ -33,6 +36,12 @@ class ApiHandler(tornado.web.RequestHandler):
             self.set_status(400)
             result_dict['errors'].append("Invalid Query or Keys")
             return self.finish(result_dict)
+        for i in keys:
+            if i not in ALLOWED_KEYS:
+                result_dict['errors'].append("Invalid key: {}".format(i))
+        if result_dict['errors']:
+            self.set_status(400)
+            return self.finish(result_dict)
         limit = self.get_argument('limit', None)
         offset = self.get_argument('offset', None)
         self.set_header("Content-Type", "application/json")
@@ -41,11 +50,10 @@ class ApiHandler(tornado.web.RequestHandler):
             self.set_status(400)
             result_dict['errors'].append("Empty Query")
             return self.finish(result_dict)
-        if mode == '0':
-            query = '{}*'.format(q)
-        elif mode == '1':
-            query = '*{}*'.format(q)
-        else:
+        query = '{}*'.format(q)
+        if mode == '1':
+            query = '*' + query
+        elif mode != '0':
             self.set_status(404)
             result_dict['errors'].append("Invalid mode")
             return self.finish(result_dict)
@@ -70,6 +78,8 @@ class ApiHandler(tornado.web.RequestHandler):
                 self.set_status(400)
                 result_dict['errors'].append("Invalid offset")
                 return self.finish(result_dict)
+
+            total_items = len(db_keys)
             db_keys = db_keys[offset * limit:(offset + 1) * limit]
         for i in db_keys:
             val = yield from redis.smembers(i)
@@ -79,7 +89,9 @@ class ApiHandler(tornado.web.RequestHandler):
                 for key in keys:
                     tmp_result[key] = tmp_val[key]
                 result.append(tmp_result)
-        result_dict['result'] = result
+        result_dict['items'] = result
+        result_dict['total_items'] = total_items
+        result_dict['status'] = 'success'
         self.finish(result_dict)
 
 
