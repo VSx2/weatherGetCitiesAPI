@@ -1,8 +1,13 @@
 import sys
 import json
-import redis
+
 import argparse
 import configparser
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.exc import SQLAlchemyError
+
+from .models import DeclarativeBase, City
 
 
 def main(argv=sys.argv):
@@ -33,14 +38,23 @@ def main(argv=sys.argv):
         except Exception as e:
             print(e)
             sys.exit()
+        Session = sessionmaker()
+        engine = create_engine(
+            local_conf.get('db_connection') or 'sqlite:///cities.db'
+        )
+        Session.configure(bind=engine)
+
+        DBSession = Session()
+
+        DeclarativeBase.metadata.create_all(engine)
         for i in value:
-            r = redis.StrictRedis(
-                host=local_conf.get('redis.host') or 'localhost',
-                port=local_conf.get('redis.port') or 6379,
-                db=local_conf.get('redis.db') or 0
-            )
             if i.get('name'):
-                val = {}
-                for j in i.keys():
-                    val[j] = i[j]
-                r.sadd(i.get('name').lower(), json.dumps(val))
+                city = City()
+                city.map_data(i)
+                try:
+                    DBSession.add(city)
+                    DBSession.flush()
+                except SQLAlchemyError as e:
+                    print('DB Error')
+                    raise e
+        DBSession.commit()

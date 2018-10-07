@@ -80,14 +80,10 @@ Response:
         }
     ],
     "status": "success",
-    "total_items": 2
+    "total_items": 1
 }
 ```
 
-URL:
-```json
-http://apis.mcwladkoe.ml/api?mode=0&q=Rio de janeiro
-```
 
 Response:
 ```json

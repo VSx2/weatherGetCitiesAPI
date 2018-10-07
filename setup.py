@@ -2,13 +2,13 @@
 from setuptools import setup, find_packages
 
 requires = [
-    'aioredis',
+    'aiosqlite',
     'tornado',
-    'redis',
+    'tornado-sqlalchemy',
     ]
 
 setup(name='owm_cities',
-      version='0.1',
+      version='1.0.0',
       description='Unofficial api for OWM cities',
       author='McWladkoE',
       author_email='svevladislav@gmail.com',
