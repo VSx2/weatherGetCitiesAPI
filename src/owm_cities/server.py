@@ -2,23 +2,26 @@
 import sys
 import tornado.web
 import tornado.gen
+from tornado.ioloop import IOLoop
+from tornado.httpserver import HTTPServer
 
-import aioredis
-import asyncio
-
-import json
 import argparse
 import configparser
+
+from tornado_sqlalchemy import (
+    make_session_factory,
+    SessionMixin
+)
+from .models import City
 
 ALLOWED_FIELDS = set(["name", "id", "country", "coord"])
 
 
-class ApiHandler(tornado.web.RequestHandler):
+class ApiHandler(SessionMixin, tornado.web.RequestHandler):
 
     # modes:
     # 0 - search by first letter(-s)
     # 1 - search by "ilike"
-    @asyncio.coroutine
     @tornado.web.asynchronous
     @tornado.gen.coroutine
     def get(self):
@@ -30,7 +33,7 @@ class ApiHandler(tornado.web.RequestHandler):
 
         mode = self.get_argument('mode', None)
         try:
-            q = self.get_argument('q', None).lower()
+            q = self.get_argument('q', '').lower()
             fields = self.get_argument('fields', 'name,id').split(',')
         except SyntaxError:
             self.set_status(400)
@@ -50,48 +53,51 @@ class ApiHandler(tornado.web.RequestHandler):
             self.set_status(400)
             result_dict['errors'].append("Empty Query")
             return self.finish(result_dict)
-        query = '{}*'.format(q)
+        query = '{}%'.format(q)
         if mode == '1':
-            query = '*' + query
+            query = '%' + query
         elif mode != '0':
             self.set_status(404)
             result_dict['errors'].append("Invalid mode")
             return self.finish(result_dict)
-        redis = self.application.redis
-        try:
-            db_keys = yield from redis.keys(query)  # NOQA
-        except aioredis.errors.ReplyError:
-            result_dict['errors'] = 'Error loading data from DB.'
-            self.set_status(500)
-            return self.finish(result_dict)
-        result = []
-        total_items = len(db_keys)
-        if limit:
-            try:
-                limit = int(limit)
-            except ValueError:
-                self.set_status(400)
-                result_dict['errors'].append("Invalid limit")
-                return self.finish(result_dict)
-            try:
-                offset = int(offset or 0)
-            except ValueError:
-                self.set_status(400)
-                result_dict['errors'].append("Invalid offset")
-                return self.finish(result_dict)
-            db_keys = db_keys[offset * limit:(offset + 1) * limit]
-        for i in db_keys:
-            val = yield from redis.smembers(i)
-            for j in val:
-                tmp_val = json.loads(j)
+        with self.make_session() as session:
+            # Unable to do async
+            # (SQLite objects created in a thread can
+            # only be used in that same thread.)
+            select_attrs = []
+            for i in fields:
+                select_attrs.append(getattr(City, i))
+            items = session.query(*select_attrs).filter(City.name.like(query))\
+                .order_by(City.id)
+            total_items = items.count()
+            if limit:
+                try:
+                    limit = int(limit)
+                except ValueError:
+                    self.set_status(400)
+                    result_dict['errors'].append("Invalid limit")
+                    return self.finish(result_dict)
+                items = items.limit(limit)
+            if offset:
+                try:
+                    offset = int(offset or 0)
+                except ValueError:
+                    self.set_status(400)
+                    result_dict['errors'].append("Invalid offset")
+                    return self.finish(result_dict)
+                items = items.offset(offset)
+
+            result = []
+
+            for j in items:
                 tmp_result = {}
                 for field in fields:
-                    tmp_result[field] = tmp_val[field]
+                    tmp_result[field] = getattr(j, field)
                 result.append(tmp_result)
-        result_dict['items'] = result
-        result_dict['total_items'] = total_items
-        result_dict['status'] = 'success'
-        self.finish(result_dict)
+            result_dict['items'] = result
+            result_dict['total_items'] = total_items
+            result_dict['status'] = 'success'
+            self.finish(result_dict)
 
 
 class MainHandler(tornado.web.RequestHandler):
@@ -107,7 +113,7 @@ class DocHandler(tornado.web.RequestHandler):
 
 
 class Application(tornado.web.Application):
-    def __init__(self):
+    def __init__(self, config):
         tornado.ioloop.IOLoop.configure(
             'tornado.platform.asyncio.AsyncIOMainLoop'
         )
@@ -117,25 +123,11 @@ class Application(tornado.web.Application):
             (r"/api", ApiHandler),
             (r"/doc", DocHandler)
         ]
-
-        super().__init__(handlers, debug=True)
-
-    def init_with_loop(self, loop, config):
-        redis_db = 0
-        try:
-            redis_db = int(config.get('redis.db'))
-        except ValueError:
-            print("redis.db must be integer. Use default value(0)")
-        self.redis = loop.run_until_complete(
-            aioredis.create_redis(
-                (
-                    config.get('redis.host') or 'localhost',
-                    config.get('redis.port') or 6379
-                ),
-                db=int(config.get('redis.db')) or 0,
-                loop=loop
-            )
+        session_factory = make_session_factory(
+            config.get('db_connection') or 'sqlite:///cities.db'
         )
+
+        super().__init__(handlers, session_factory=session_factory, debug=True)
 
 
 def main(argv=sys.argv):
@@ -154,12 +146,10 @@ def main(argv=sys.argv):
     config.read(config_uri)
     local_conf = config['DEFAULT']
 
-    application = Application()
-    application.listen(local_conf.get('web.port') or 8888)
-
-    loop = asyncio.get_event_loop()
-    application.init_with_loop(loop, local_conf)
-    loop.run_forever()
+    application = Application(local_conf)
+    http_server = HTTPServer(application)
+    http_server.listen(local_conf.get('web.port') or 8888)
+    IOLoop.current().start()
 
 
 if __name__ == '__main__':
