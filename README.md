@@ -1,12 +1,19 @@
 # weatherGetCitiesAPI
 ### Important! This API is for <a href="https://openweathermap.org" target="_blank">OpenWeatherMap</a> cities. :sunny:
 
+### Introduction
+
+_When our team decided to develop this API, the problem was in the point , that OpenWeartherMap API hasn't provided a possibility to get all cities by request. They propose to get cities only from the big 29mbs json file called city.list.json . If you use their's API  for web or desktop apps - it's ok, you can store this file.In other cases, e.g. when you develop a mobile app, it isn't a good idea to store 29mbs file on a mobile device.So you need to have an API, that can give you some cities by request. Using weatherGetCitiesAPI you can get all cities, get cities by name in some different ways and control fields & count of requested cities._
+
+_We hope that this API will help you )_
+
 ### Usage
 
-**URL:** 
-
-   http:<span></span>//apis.mcwladkoe.ml/api?mode=**{mode_code}**&q=**{query_string}**   
-   // You can pass some Additional params
+**URL:**
+```markdown
+    http://apis.mcwladkoe.ml/api?mode={mode_code}&q={query_string}
+```
+   You can pass some Additional params
 
 #### Main params
 
@@ -45,16 +52,22 @@ You can combine fields. Default fields=name,id
 	* <p>error</p>   
 
 **total_items** - count of found cities in cities.list.json by query (type Integer)
-
+```json
 {"errors": [], "items": [{"name": "Oradell", "id": 5102208}], "status": "success", "total_items": 1}
+```
 
 ### Examples
 
 #### Examples without additional params
 
-URL: http://apis.mcwladkoe.ml/api?mode=0&q=Kh
+URL:
+```json
+http://apis.mcwladkoe.ml/api?mode=0&q=Kh
+```
 
-Response: {
+Response:
+```json
+{
     "errors": [],
     "items": [
         {
@@ -66,10 +79,16 @@ Response: {
     "status": "success",
     "total_items": 502
 }
+```
 
-URL: http://apis.mcwladkoe.ml/api?mode=0&q=Rio de janeiro
+URL:
+```json
+http://apis.mcwladkoe.ml/api?mode=0&q=Rio de janeiro
+```
 
-Response: {
+Response:
+```json
+{
     "errors": [],
     "items": [
         {
@@ -80,13 +99,18 @@ Response: {
     "status": "success",
     "total_items": 1
 }
-
+```
 
 #### Examples with additional parametres
 
-URL: http://apis.mcwladkoe.ml/api?mode=0&q=Khark&fields=name
+URL:
+```json
+http://apis.mcwladkoe.ml/api?mode=0&q=Khark&fields=name
+```
 
-Response: {
+Response:
+```json
+{
     "errors": [],
     "items": [
         {
@@ -108,10 +132,15 @@ Response: {
     "status": "success",
     "total_items": 4
 }
+```
 
-URL: http://apis.mcwladkoe.ml/api?mode=0&q=Khark&limit=2
-
-Response: {
+URL:
+```json
+http://apis.mcwladkoe.ml/api?mode=0&q=Khark&limit=2
+```
+Response:
+```json
+{
     "errors": [],
     "items": [
         {
@@ -126,10 +155,16 @@ Response: {
     "status": "success",
     "total_items": 4
 }
+```
 
-URL: http://apis.mcwladkoe.ml/api?mode=1&q=ord&limit=2&fields=name,country
+URL:
+```json
+http://apis.mcwladkoe.ml/api?mode=1&q=ord&limit=2&fields=name,country
+```
 
-Response: {
+Response: 
+```json
+{
     "errors": [],
     "items": [
         {
@@ -156,7 +191,7 @@ Response: {
     "status": "success",
     "total_items": 846
 }
-
+```
 
 
 
