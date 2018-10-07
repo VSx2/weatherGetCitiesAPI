@@ -74,7 +74,7 @@ Response:
             "name": "Khaty",
             "id": 2021026
         },
-        ... / a lot of objects
+        ...
     ],
     "status": "success",
     "total_items": 502
