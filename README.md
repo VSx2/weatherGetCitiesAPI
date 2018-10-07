@@ -62,7 +62,7 @@ You can combine fields. Default fields=name,id
 
 URL:
 ```json
-http://apis.mcwladkoe.ml/api?mode=0&q=Kh
+http://apis.mcwladkoe.ml/api?mode=0&q=Rio De J
 ```
 
 Response:
@@ -71,13 +71,16 @@ Response:
     "errors": [],
     "items": [
         {
-            "name": "Khaty",
-            "id": 2021026
+            "name": "Rio de Janeiro",
+            "id": 3451190
         },
-        ...
+        {
+            "name": "Rio de Jesus",
+            "id": 3701882
+        }
     ],
     "status": "success",
-    "total_items": 502
+    "total_items": 2
 }
 ```
 
