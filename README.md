@@ -11,7 +11,7 @@ _We hope that this API will help you )_
 
 **URL:**
 ```markdown
-    http://apis.mcwladkoe.ml/api?mode={mode_code}&q={query_string}
+    http://cities.vsx2.com/api?mode={mode_code}&q={query_string}
 ```
    You can pass some Additional params
 
@@ -62,7 +62,7 @@ You can combine fields. Default fields=name,id
 
 URL:
 ```json
-http://apis.mcwladkoe.ml/api?mode=0&q=Rio De J
+http://cities.vsx2.com/api?mode=0&q=Rio De J
 ```
 
 Response:
@@ -104,7 +104,7 @@ Response:
 
 URL:
 ```json
-http://apis.mcwladkoe.ml/api?mode=0&q=Khark&fields=name
+http://cities.vsx2.com/api?mode=0&q=Khark&fields=name
 ```
 
 Response:
@@ -135,7 +135,7 @@ Response:
 
 URL:
 ```json
-http://apis.mcwladkoe.ml/api?mode=0&q=Khark&limit=2
+http://cities.vsx2.com/api?mode=0&q=Khark&limit=2
 ```
 Response:
 ```json
@@ -158,7 +158,7 @@ Response:
 
 URL:
 ```json
-http://apis.mcwladkoe.ml/api?mode=1&q=ord&limit=2&fields=name,country
+http://cities.vsx2.com/api?mode=1&q=ord&limit=2&fields=name,country
 ```
 
 Response: 
